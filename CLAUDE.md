@@ -1,30 +1,78 @@
 # CLAUDE.md - AI Assistant Guide for Metroidvania Clone Repository
 
+**Last Updated:** 2025-11-20
+**Architecture:** Multi-Agent Build System
+**Status:** 🟢 READY TO START
+
+---
+
 ## Repository Overview
 
-**Repository Purpose:** Build Specification & Master Prompt Document
-**Current State:** Contains autonomous build instructions for creating a complete Metroidvania game
-**Primary File:** `METROIDVANIA_BUILD_PACKAGE.md` (1596 lines)
-**Target Output:** Fully playable browser-based Metroidvania game using Phaser.js
+**Repository Purpose:** Multi-Agent Build System for Metroidvania Game
+**Current State:** Complete agent specifications + modular build instructions
+**Build Method:** 11 specialized agents working in parallel
+**Target Output:** Fully playable browser-based Metroidvania game (2.5-3 hours)
 
-### What This Repository Is
+### What This Repository Contains
 
-This is a **build specification repository** containing a comprehensive master prompt designed for Claude Code to autonomously build a complete, playable Metroidvania game from scratch in 2-6 hours. It is NOT an existing game codebase - it's the blueprint for creating one.
+This is an **agent-orchestrated build system** with:
+- ✅ 11 agent specifications (roles, tasks, outputs)
+- ✅ Individual TODO files for each agent
+- ✅ Modular build specifications (focused files)
+- ✅ Coordination protocol for agent communication
+- ✅ Quality assurance framework
+- ✅ Complete coding standards
 
 ### What This Repository Is NOT
 
-- ❌ An existing game with source code
-- ❌ A game engine or framework
-- ❌ A library or module
-- ❌ A work-in-progress game
+- ❌ An existing game with source code (game will be built by agents)
+- ❌ A single monolithic prompt (refactored into modular system)
+- ❌ A manual build process (fully autonomous)
 
-## Repository Structure (Current State)
+## Repository Structure
 
 ```
-/home/user/Metroidvania_clone/
-├── .git/                                    # Git repository
-├── METROIDVANIA_BUILD_PACKAGE.md            # Complete build specification (48KB)
-└── CLAUDE.md                                # This file (AI assistant guide)
+Metroidvania_clone/
+├── CLAUDE.md (this file)                  # AI assistant guide
+├── MASTER_AGENT_CONFIG.md                 # Complete agent coordination protocol
+├── COORDINATION_FLOW.md                   # How agents work together
+├── METROIDVANIA_BUILD_PACKAGE.md          # Original monolithic spec (reference)
+├── MODULAR_STRUCTURE_PROPOSAL.md          # Architecture proposal
+│
+├── TODO_ORCHESTRATOR.md                   # ORCHESTRATOR's task list
+├── TODO_PLAYER_SYSTEM.md                  # PLAYER-SYSTEM's task list
+├── TODO_COMBAT_SYSTEM.md                  # COMBAT-SYSTEM's task list
+├── TODO_MAP_SYSTEM.md                     # MAP-SYSTEM's task list
+├── TODO_ABILITY_SYSTEM.md                 # ABILITY-SYSTEM's task list
+├── TODO_ENEMY_SYSTEM.md                   # ENEMY-SYSTEM's task list
+├── TODO_UI_SYSTEM.md                      # UI-SYSTEM's task list
+├── TODO_EFFECTS_SYSTEM.md                 # EFFECTS-SYSTEM's task list
+├── TODO_STANDARDS_ENFORCEMENT.md          # STANDARDS-ENFORCEMENT's task list
+├── TODO_SCENE_INTEGRATION.md              # SCENE-INTEGRATION's task list
+├── TODO_TESTING_VALIDATION.md             # TESTING-VALIDATION's task list
+│
+├── agents/                                # Agent specifications (11 agents)
+│   ├── ORCHESTRATOR.md
+│   ├── PLAYER-SYSTEM.md
+│   ├── COMBAT-SYSTEM.md
+│   ├── MAP-SYSTEM.md
+│   ├── ABILITY-SYSTEM.md
+│   ├── ENEMY-SYSTEM.md
+│   ├── UI-SYSTEM.md
+│   ├── EFFECTS-SYSTEM.md
+│   ├── SCENE-INTEGRATION.md
+│   ├── STANDARDS-ENFORCEMENT.md
+│   └── TESTING-VALIDATION.md
+│
+├── build-specs/                           # Modular build specifications
+│   ├── 00-overview.md                     # Project overview & 29 success criteria
+│   ├── 01-project-init.md                 # Phase 1 initialization
+│   └── standards/
+│       ├── coding-standards.md            # Complete style guide
+│       └── error-prevention.md            # Error handling framework
+│
+└── deliverables/                          # Agent output files (created during build)
+    └── (Agent JSON outputs will be written here)
 ```
 
 ## Understanding the Build Specification
