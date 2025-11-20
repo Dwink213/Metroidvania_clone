@@ -4,6 +4,7 @@
  */
 import EventBus from '../EventBus.js';
 import PhysicsConstants from './PhysicsConstants.js';
+import HealthComponent from '../combat/HealthComponent.js';
 
 export default class PlayerController {
     constructor(scene, x, y) {
@@ -14,6 +15,9 @@ export default class PlayerController {
         scene.physics.add.existing(this.sprite);
         this.sprite.body.setCollideWorldBounds(true);
         this.sprite.body.setMaxVelocity(PhysicsConstants.MOVE_SPEED, PhysicsConstants.MAX_FALL_SPEED);
+
+        // Initialize health component
+        this.health = new HealthComponent(this, 100);
 
         // State
         this.facing = 'right';
@@ -42,6 +46,9 @@ export default class PlayerController {
         }
 
         const dt = delta / 1000;
+
+        // Update health component (invincibility frames)
+        this.health.update(delta);
 
         // Update timers
         this.coyoteTimer -= dt;
@@ -221,7 +228,16 @@ export default class PlayerController {
         }
     }
 
-    takeDamage(amount, knockbackDirection) {
-        EventBus.emit('player:damaged', { amount, knockbackDirection });
+    takeDamage(amount, source) {
+        // Health component handles damage, invincibility, and emits events
+        this.health.takeDamage(amount, source);
+    }
+
+    getSprite() {
+        return this.sprite;
+    }
+
+    setPosition(x, y) {
+        this.sprite.setPosition(x, y);
     }
 }

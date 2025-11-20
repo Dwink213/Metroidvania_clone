@@ -28,6 +28,9 @@ export default class GameScene extends Phaser.Scene {
     create() {
         console.log('[GameScene] Initializing all systems...');
 
+        // Game ready flag - prevent updates until fully initialized
+        this.gameReady = false;
+
         // Load game data
         const roomsData = this.cache.json.get('rooms');
         const enemiesData = this.cache.json.get('enemies');
@@ -79,6 +82,8 @@ export default class GameScene extends Phaser.Scene {
             this.camera.snapToTarget();
             // Setup collisions after room loads
             this.setupCollisions();
+            // Mark game as ready after first room load
+            this.gameReady = true;
         });
 
         // Combat events for player health updates
@@ -136,8 +141,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        // Don't update if paused
-        if (this.pauseMenu.isVisible()) {
+        // Don't update if game not ready or paused
+        if (!this.gameReady || this.pauseMenu.isVisible()) {
             return;
         }
 

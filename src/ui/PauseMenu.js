@@ -1,4 +1,5 @@
 import MenuSystem from './MenuSystem.js';
+import SettingsMenu from './SettingsMenu.js';
 
 /**
  * PauseMenu - ESC to pause game
@@ -8,6 +9,8 @@ export default class PauseMenu extends MenuSystem {
         super(scene);
         this.saveCallback = saveCallback;
         this.quitCallback = quitCallback;
+        this.settingsMenu = new SettingsMenu(scene);
+        this.settingsMenu.hide();
         this.createMenu();
     }
 
@@ -45,7 +48,7 @@ export default class PauseMenu extends MenuSystem {
             if (this.saveCallback) this.saveCallback();
         });
         this.createButton(centerX, centerY + 80, 'Settings', () => {
-            console.log('[PauseMenu] Settings clicked');
+            this.settingsMenu.show();
         });
         this.createButton(centerX, centerY + 130, 'Quit to Menu', () => {
             if (this.quitCallback) this.quitCallback();

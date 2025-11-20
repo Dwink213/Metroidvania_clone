@@ -1,3 +1,5 @@
+import SettingsMenu from '../ui/SettingsMenu.js';
+
 /**
  * MainMenuScene - Main menu with New Game, Continue, Settings
  */
@@ -7,6 +9,9 @@ export default class MainMenuScene extends Phaser.Scene {
     }
 
     create() {
+        // Initialize settings menu
+        this.settingsMenu = new SettingsMenu(this);
+        this.settingsMenu.hide();
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
 
@@ -40,7 +45,7 @@ export default class MainMenuScene extends Phaser.Scene {
 
         // Settings button
         this.createButton(width / 2, height / 2 + 120, 'Settings', () => {
-            console.log('[MainMenu] Settings clicked');
+            this.settingsMenu.show();
         });
 
         // Instructions
