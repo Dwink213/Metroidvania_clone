@@ -1,0 +1,198 @@
+{
+  "room_01": {
+    "id": "room_01",
+    "name": "Starting Chamber",
+    "width": 1280,
+    "height": 704,
+    "backgroundColor": 0x2a2a2a,
+    "spawnPoint": { "x": 320, "y": 480 },
+    "connections": {
+      "north": { "roomId": "room_03", "doorType": "locked", "requires": "key_01", "x": 640, "y": 32 },
+      "east": { "roomId": "room_02", "doorType": "open", "x": 1248, "y": 352 },
+      "west": { "roomId": "room_05", "doorType": "ability", "requires": "dash", "x": 32, "y": 352 }
+    },
+    "platforms": [
+      { "x": 0, "y": 650, "width": 1280, "height": 54 },
+      { "x": 200, "y": 500, "width": 200, "height": 20 },
+      { "x": 880, "y": 500, "width": 200, "height": 20 },
+      { "x": 540, "y": 350, "width": 200, "height": 20 }
+    ],
+    "walls": [
+      { "x": 0, "y": 0, "width": 32, "height": 704 },
+      { "x": 1248, "y": 0, "width": 32, "height": 704 }
+    ]
+  },
+  "room_02": {
+    "id": "room_02",
+    "name": "Eastern Corridor",
+    "width": 1280,
+    "height": 704,
+    "backgroundColor": 0x1a2a3a,
+    "spawnPoint": { "x": 100, "y": 480 },
+    "connections": {
+      "west": { "roomId": "room_01", "doorType": "open", "x": 32, "y": 352 },
+      "east": { "roomId": "room_04", "doorType": "open", "x": 1248, "y": 352 },
+      "south": { "roomId": "room_06", "doorType": "ability", "requires": "doubleJump", "x": 640, "y": 672 }
+    },
+    "platforms": [
+      { "x": 0, "y": 650, "width": 1280, "height": 54 },
+      { "x": 150, "y": 500, "width": 150, "height": 20 },
+      { "x": 450, "y": 400, "width": 150, "height": 20 },
+      { "x": 750, "y": 300, "width": 150, "height": 20 },
+      { "x": 1050, "y": 400, "width": 150, "height": 20 }
+    ],
+    "walls": [
+      { "x": 0, "y": 0, "width": 32, "height": 704 },
+      { "x": 1248, "y": 0, "width": 32, "height": 704 }
+    ]
+  },
+  "room_03": {
+    "id": "room_03",
+    "name": "Locked Treasury",
+    "width": 1280,
+    "height": 704,
+    "backgroundColor": 0x3a2a1a,
+    "spawnPoint": { "x": 640, "y": 600 },
+    "connections": {
+      "south": { "roomId": "room_01", "doorType": "open", "x": 640, "y": 672 }
+    },
+    "platforms": [
+      { "x": 0, "y": 650, "width": 1280, "height": 54 },
+      { "x": 400, "y": 450, "width": 480, "height": 20 }
+    ],
+    "walls": [
+      { "x": 0, "y": 0, "width": 32, "height": 704 },
+      { "x": 1248, "y": 0, "width": 32, "height": 704 }
+    ],
+    "collectibles": [
+      { "type": "health_upgrade", "x": 640, "y": 400 }
+    ]
+  },
+  "room_04": {
+    "id": "room_04",
+    "name": "Eastern Outpost",
+    "width": 1280,
+    "height": 704,
+    "backgroundColor": 0x2a1a2a,
+    "spawnPoint": { "x": 100, "y": 480 },
+    "connections": {
+      "west": { "roomId": "room_02", "doorType": "open", "x": 32, "y": 352 }
+    },
+    "platforms": [
+      { "x": 0, "y": 650, "width": 1280, "height": 54 },
+      { "x": 300, "y": 500, "width": 200, "height": 20 },
+      { "x": 700, "y": 400, "width": 200, "height": 20 }
+    ],
+    "walls": [
+      { "x": 0, "y": 0, "width": 32, "height": 704 },
+      { "x": 1248, "y": 0, "width": 32, "height": 704 }
+    ],
+    "enemies": [
+      { "type": "patroller", "x": 500, "y": 600 },
+      { "type": "flyer", "x": 800, "y": 300 }
+    ]
+  },
+  "room_05": {
+    "id": "room_05",
+    "name": "Western Chamber",
+    "width": 1280,
+    "height": 704,
+    "backgroundColor": 0x1a2a1a,
+    "spawnPoint": { "x": 1100, "y": 480 },
+    "connections": {
+      "east": { "roomId": "room_01", "doorType": "open", "x": 1248, "y": 352 }
+    },
+    "platforms": [
+      { "x": 0, "y": 650, "width": 1280, "height": 54 },
+      { "x": 100, "y": 500, "width": 300, "height": 20 },
+      { "x": 600, "y": 400, "width": 200, "height": 20 }
+    ],
+    "walls": [
+      { "x": 0, "y": 0, "width": 32, "height": 704 },
+      { "x": 1248, "y": 0, "width": 32, "height": 704 }
+    ],
+    "collectibles": [
+      { "type": "dash", "x": 200, "y": 450 }
+    ]
+  },
+  "room_06": {
+    "id": "room_06",
+    "name": "Descent Cavern",
+    "width": 1280,
+    "height": 704,
+    "backgroundColor": 0x1a1a2a,
+    "spawnPoint": { "x": 640, "y": 100 },
+    "connections": {
+      "north": { "roomId": "room_02", "doorType": "open", "x": 640, "y": 32 },
+      "south": { "roomId": "room_07", "doorType": "ability", "requires": "wallJump", "x": 640, "y": 672 }
+    },
+    "platforms": [
+      { "x": 0, "y": 650, "width": 1280, "height": 54 },
+      { "x": 100, "y": 200, "width": 200, "height": 20 },
+      { "x": 400, "y": 350, "width": 200, "height": 20 },
+      { "x": 700, "y": 500, "width": 200, "height": 20 }
+    ],
+    "walls": [
+      { "x": 0, "y": 0, "width": 32, "height": 704 },
+      { "x": 1248, "y": 0, "width": 32, "height": 704 },
+      { "x": 300, "y": 150, "width": 20, "height": 200 },
+      { "x": 980, "y": 350, "width": 20, "height": 200 }
+    ],
+    "collectibles": [
+      { "type": "doubleJump", "x": 640, "y": 300 }
+    ]
+  },
+  "room_07": {
+    "id": "room_07",
+    "name": "Antechamber",
+    "width": 1280,
+    "height": 704,
+    "backgroundColor": 0x2a1a1a,
+    "spawnPoint": { "x": 100, "y": 480 },
+    "connections": {
+      "north": { "roomId": "room_06", "doorType": "open", "x": 640, "y": 32 },
+      "east": { "roomId": "room_08", "doorType": "boss", "x": 1248, "y": 352 }
+    },
+    "platforms": [
+      { "x": 0, "y": 650, "width": 1280, "height": 54 },
+      { "x": 200, "y": 500, "width": 200, "height": 20 },
+      { "x": 500, "y": 400, "width": 200, "height": 20 },
+      { "x": 800, "y": 300, "width": 200, "height": 20 }
+    ],
+    "walls": [
+      { "x": 0, "y": 0, "width": 32, "height": 704 },
+      { "x": 1248, "y": 0, "width": 32, "height": 704 }
+    ],
+    "enemies": [
+      { "type": "charger", "x": 400, "y": 600 },
+      { "type": "turret", "x": 900, "y": 250 }
+    ]
+  },
+  "room_08": {
+    "id": "room_08",
+    "name": "Boss Chamber",
+    "width": 1600,
+    "height": 900,
+    "backgroundColor": 0x1a0a0a,
+    "spawnPoint": { "x": 200, "y": 700 },
+    "connections": {
+      "west": { "roomId": "room_07", "doorType": "open", "x": 32, "y": 450 }
+    },
+    "platforms": [
+      { "x": 0, "y": 850, "width": 1600, "height": 50 },
+      { "x": 400, "y": 650, "width": 300, "height": 20 },
+      { "x": 900, "y": 650, "width": 300, "height": 20 },
+      { "x": 650, "y": 500, "width": 300, "height": 20 }
+    ],
+    "walls": [
+      { "x": 0, "y": 0, "width": 32, "height": 900 },
+      { "x": 1568, "y": 0, "width": 32, "height": 900 }
+    ],
+    "boss": {
+      "type": "mainBoss",
+      "x": 1200,
+      "y": 700,
+      "health": 500
+    }
+  }
+}

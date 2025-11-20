@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map System Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .test {
+            margin: 15px 0;
+            padding: 10px;
+            background: #0f0f0f;
+            border-left: 4px solid #555;
+            border-radius: 4px;
+        }
+        .test.pass {
+            border-left-color: #00ff00;
+            background: #0a1a0a;
+        }
+        .test.fail {
+            border-left-color: #ff0000;
+            background: #1a0a0a;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .summary.all-pass {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .summary.has-fails {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🗺️ MAP SYSTEM TEST SUITE 🗺️</h1>
+        <div id="test-results"></div>
+        <div id="test-summary" class="summary"></div>
+    </div>
+
+    <script type="module">
+        // Mock rooms data
+        const mockRoomsData = {
+            "room_01": {
+                "id": "room_01",
+                "name": "Starting Chamber",
+                "width": 1280,
+                "height": 704,
+                "connections": {
+                    "east": { "roomId": "room_02", "doorType": "open" },
+                    "west": { "roomId": "room_05", "doorType": "ability", "requires": "dash" }
+                }
+            },
+            "room_02": {
+                "id": "room_02",
+                "name": "Eastern Corridor",
+                "width": 1280,
+                "height": 704,
+                "connections": {
+                    "west": { "roomId": "room_01", "doorType": "open" }
+                }
+            },
+            "room_05": {
+                "id": "room_05",
+                "name": "Western Chamber",
+                "width": 1280,
+                "height": 704,
+                "connections": {
+                    "east": { "roomId": "room_01", "doorType": "open" }
+                }
+            }
+        };
+
+        // Mock RoomData class
+        class RoomData {
+            constructor(roomsJson) {
+                this.rooms = roomsJson;
+                this.roomIds = Object.keys(roomsJson);
+            }
+            getRoom(roomId) {
+                return this.rooms[roomId] || null;
+            }
+            getAllRoomIds() {
+                return this.roomIds;
+            }
+            getConnections(roomId) {
+                const room = this.getRoom(roomId);
+                return room ? room.connections : {};
+            }
+            getConnectedRoom(roomId, direction) {
+                const connections = this.getConnections(roomId);
+                if (!connections[direction]) return null;
+                return connections[direction].roomId;
+            }
+            validateConnections() {
+                const errors = [];
+                for (const roomId of this.roomIds) {
+                    const room = this.getRoom(roomId);
+                    const connections = room.connections || {};
+                    for (const direction in connections) {
+                        const targetRoomId = connections[direction].roomId;
+                        const targetRoom = this.getRoom(targetRoomId);
+                        if (!targetRoom) {
+                            errors.push(`${roomId} connects to non-existent room: ${targetRoomId}`);
+                        }
+                    }
+                }
+                return errors;
+            }
+        }
+
+        // Mock DoorController class
+        class DoorController {
+            constructor() {
+                this.unlockedAbilities = new Set();
+            }
+            canPassDoor(connection) {
+                if (!connection) return false;
+                if (connection.doorType === 'open') return true;
+                if (connection.doorType === 'ability') {
+                    return this.unlockedAbilities.has(connection.requires);
+                }
+                return false;
+            }
+            unlockAbility(abilityId) {
+                this.unlockedAbilities.add(abilityId);
+            }
+            getDoorFeedback(connection) {
+                if (connection.doorType === 'open') return 'Open';
+                if (connection.doorType === 'ability') {
+                    const hasAbility = this.unlockedAbilities.has(connection.requires);
+                    return hasAbility ? 'Unlocked' : `Locked (Need: ${connection.requires})`;
+                }
+                return 'Unknown';
+            }
+        }
+
+        // Test runner
+        const tests = [];
+        const resultsContainer = document.getElementById('test-results');
+        const summaryContainer = document.getElementById('test-summary');
+
+        function test(name, fn) {
+            tests.push({ name, fn });
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        // Test 1: RoomData initialization
+        test('RoomData initializes with room data', () => {
+            const roomData = new RoomData(mockRoomsData);
+            assert(roomData.getAllRoomIds().length === 3, 'Should have 3 rooms');
+        });
+
+        // Test 2: Get room by ID
+        test('RoomData can get room by ID', () => {
+            const roomData = new RoomData(mockRoomsData);
+            const room = roomData.getRoom('room_01');
+            assert(room !== null, 'Room should exist');
+            assert(room.id === 'room_01', 'Room ID should match');
+            assert(room.name === 'Starting Chamber', 'Room name should match');
+        });
+
+        // Test 3: Get connections
+        test('RoomData can get room connections', () => {
+            const roomData = new RoomData(mockRoomsData);
+            const connections = roomData.getConnections('room_01');
+            assert(connections.east !== undefined, 'Should have east connection');
+            assert(connections.west !== undefined, 'Should have west connection');
+        });
+
+        // Test 4: Get connected room
+        test('RoomData can get connected room ID', () => {
+            const roomData = new RoomData(mockRoomsData);
+            const connectedRoomId = roomData.getConnectedRoom('room_01', 'east');
+            assert(connectedRoomId === 'room_02', 'Should connect to room_02');
+        });
+
+        // Test 5: Validate connections
+        test('RoomData validates connections correctly', () => {
+            const roomData = new RoomData(mockRoomsData);
+            const errors = roomData.validateConnections();
+            assert(errors.length === 0, 'No validation errors expected');
+        });
+
+        // Test 6: DoorController - Open doors
+        test('DoorController allows passing through open doors', () => {
+            const doorController = new DoorController();
+            const connection = { doorType: 'open' };
+            assert(doorController.canPassDoor(connection) === true, 'Open doors should be passable');
+        });
+
+        // Test 7: DoorController - Locked ability doors
+        test('DoorController blocks locked ability doors', () => {
+            const doorController = new DoorController();
+            const connection = { doorType: 'ability', requires: 'dash' };
+            assert(doorController.canPassDoor(connection) === false, 'Locked doors should be blocked');
+        });
+
+        // Test 8: DoorController - Unlocking abilities
+        test('DoorController allows passing after unlocking ability', () => {
+            const doorController = new DoorController();
+            const connection = { doorType: 'ability', requires: 'dash' };
+            doorController.unlockAbility('dash');
+            assert(doorController.canPassDoor(connection) === true, 'Door should be passable after unlock');
+        });
+
+        // Test 9: DoorController - Door feedback
+        test('DoorController provides correct door feedback', () => {
+            const doorController = new DoorController();
+            const connection = { doorType: 'ability', requires: 'dash' };
+            const feedback = doorController.getDoorFeedback(connection);
+            assert(feedback.includes('Locked'), 'Should show locked message');
+            assert(feedback.includes('dash'), 'Should show required ability');
+        });
+
+        // Test 10: Room data integrity
+        test('All rooms have required properties', () => {
+            const roomData = new RoomData(mockRoomsData);
+            for (const roomId of roomData.getAllRoomIds()) {
+                const room = roomData.getRoom(roomId);
+                assert(room.id !== undefined, `${roomId} should have id`);
+                assert(room.name !== undefined, `${roomId} should have name`);
+                assert(room.width !== undefined, `${roomId} should have width`);
+                assert(room.height !== undefined, `${roomId} should have height`);
+            }
+        });
+
+        // Run all tests
+        async function runTests() {
+            let passed = 0;
+            let failed = 0;
+
+            for (const { name, fn } of tests) {
+                try {
+                    fn();
+                    passed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test pass">
+                            <div class="test-name">✓ ${name}</div>
+                            <div class="test-result">PASS</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    failed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test fail">
+                            <div class="test-name">✗ ${name}</div>
+                            <div class="test-result">FAIL: ${error.message}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            const total = passed + failed;
+            const percentage = ((passed / total) * 100).toFixed(1);
+            const summaryClass = failed === 0 ? 'all-pass' : 'has-fails';
+
+            summaryContainer.className = `summary ${summaryClass}`;
+            summaryContainer.innerHTML = `
+                <strong>Test Results:</strong> ${passed}/${total} passed (${percentage}%)
+                ${failed === 0 ? '<br>🎉 ALL TESTS PASSED! 🎉' : ''}
+            `;
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
