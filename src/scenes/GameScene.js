@@ -33,7 +33,7 @@ export default class GameScene extends Phaser.Scene {
         const enemiesData = this.cache.json.get('enemies');
 
         // Initialize core systems
-        this.input = new InputManager(this);
+        this.inputManager = new InputManager(this);
         this.map = new MapManager(this, roomsData);
         this.player = new PlayerController(this, 400, 300);
         this.combat = new CombatController(this, this.player);
@@ -55,10 +55,10 @@ export default class GameScene extends Phaser.Scene {
         this.particles = new ParticleManager(this);
         this.screenEffects = new ScreenEffects(this);
 
-        // Setup event listeners and collisions
+        // Setup event listeners and input
         this.setupEventListeners();
-        this.setupCollisions();
         this.setupInput();
+        // Note: setupCollisions() will be called after room loads
 
         // Load save or start fresh
         if (this.loadSave) {
@@ -77,6 +77,8 @@ export default class GameScene extends Phaser.Scene {
                 this.player.setPosition(data.spawnPoint.x, data.spawnPoint.y);
             }
             this.camera.snapToTarget();
+            // Setup collisions after room loads
+            this.setupCollisions();
         });
 
         // Combat events for player health updates
@@ -115,9 +117,11 @@ export default class GameScene extends Phaser.Scene {
     }
 
     setupInput() {
-        // ESC for pause menu
+        // ESC for pause menu (access Phaser's input system directly)
         this.input.keyboard.on('keydown-ESC', () => {
-            this.pauseMenu.toggle();
+            if (this.pauseMenu) {
+                this.pauseMenu.toggle();
+            }
         });
 
         // M for map (placeholder)
@@ -138,7 +142,7 @@ export default class GameScene extends Phaser.Scene {
         }
 
         // Update all systems in order
-        this.player.update(delta, this.input);
+        this.player.update(delta, this.inputManager);
         this.combat.update(delta);
         this.camera.update(delta);
         this.particles.update(delta);
