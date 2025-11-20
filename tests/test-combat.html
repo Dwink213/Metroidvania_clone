@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combat System Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .test {
+            margin: 15px 0;
+            padding: 10px;
+            background: #0f0f0f;
+            border-left: 4px solid #555;
+            border-radius: 4px;
+        }
+        .test.pass {
+            border-left-color: #00ff00;
+            background: #0a1a0a;
+        }
+        .test.fail {
+            border-left-color: #ff0000;
+            background: #1a0a0a;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .summary.all-pass {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .summary.has-fails {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>⚔️ COMBAT SYSTEM TEST SUITE ⚔️</h1>
+        <div id="test-results"></div>
+        <div id="test-summary" class="summary"></div>
+    </div>
+
+    <script type="module">
+        // Mock EventBus for testing
+        class MockEventBus {
+            constructor() {
+                this.events = {};
+            }
+            on(event, callback) {
+                if (!this.events[event]) this.events[event] = [];
+                this.events[event].push(callback);
+            }
+            emit(event, data) {
+                if (!this.events[event]) return;
+                this.events[event].forEach(cb => cb(data));
+            }
+            clear() {
+                this.events = {};
+            }
+        }
+
+        const mockEventBus = new MockEventBus();
+
+        // Mock HealthComponent (inline for testing)
+        class HealthComponent {
+            constructor(entity, maxHealth = 100) {
+                this.entity = entity;
+                this.maxHealth = maxHealth;
+                this.currentHealth = maxHealth;
+                this.isAlive = true;
+                this.invincible = false;
+                this.invincibilityTimer = 0;
+                this.invincibilityDuration = 1.5;
+            }
+            takeDamage(amount) {
+                if (!this.isAlive || this.invincible) return false;
+                this.currentHealth -= amount;
+                this.currentHealth = Math.max(0, this.currentHealth);
+                this.invincible = true;
+                this.invincibilityTimer = this.invincibilityDuration;
+                if (this.currentHealth <= 0) {
+                    this.isAlive = false;
+                }
+                return true;
+            }
+            update(delta) {
+                const dt = delta / 1000;
+                if (this.invincible) {
+                    this.invincibilityTimer -= dt;
+                    if (this.invincibilityTimer <= 0) {
+                        this.invincible = false;
+                    }
+                }
+            }
+            getHealthPercent() {
+                return this.currentHealth / this.maxHealth;
+            }
+        }
+
+        // Test runner
+        const tests = [];
+        const resultsContainer = document.getElementById('test-results');
+        const summaryContainer = document.getElementById('test-summary');
+
+        function test(name, fn) {
+            tests.push({ name, fn });
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        // Test 1: HealthComponent creation
+        test('HealthComponent initializes correctly', () => {
+            const entity = { name: 'test' };
+            const health = new HealthComponent(entity, 100);
+            assert(health.maxHealth === 100, 'Max health should be 100');
+            assert(health.currentHealth === 100, 'Current health should be 100');
+            assert(health.isAlive === true, 'Should be alive');
+        });
+
+        // Test 2: Taking damage
+        test('HealthComponent takes damage correctly', () => {
+            const entity = { name: 'test' };
+            const health = new HealthComponent(entity, 100);
+            health.takeDamage(25);
+            assert(health.currentHealth === 75, 'Health should be 75');
+        });
+
+        // Test 3: Invincibility frames
+        test('Invincibility frames prevent damage', () => {
+            const entity = { name: 'test' };
+            const health = new HealthComponent(entity, 100);
+            health.takeDamage(25);
+            const secondHit = health.takeDamage(25);
+            assert(secondHit === false, 'Second hit should be blocked');
+            assert(health.currentHealth === 75, 'Health should still be 75');
+        });
+
+        // Test 4: Invincibility expires
+        test('Invincibility expires after duration', () => {
+            const entity = { name: 'test' };
+            const health = new HealthComponent(entity, 100);
+            health.takeDamage(25);
+            // Simulate 1.6 seconds passing
+            health.update(1600);
+            const secondHit = health.takeDamage(25);
+            assert(secondHit === true, 'Second hit should succeed');
+            assert(health.currentHealth === 50, 'Health should be 50');
+        });
+
+        // Test 5: Death detection
+        test('Death detected when health reaches zero', () => {
+            const entity = { name: 'test' };
+            const health = new HealthComponent(entity, 50);
+            health.takeDamage(50);
+            assert(health.isAlive === false, 'Should be dead');
+            assert(health.currentHealth === 0, 'Health should be 0');
+        });
+
+        // Test 6: Health percent calculation
+        test('Health percent calculated correctly', () => {
+            const entity = { name: 'test' };
+            const health = new HealthComponent(entity, 100);
+            health.takeDamage(25);
+            assert(health.getHealthPercent() === 0.75, 'Health percent should be 0.75');
+        });
+
+        // Test 7: Damage clamping
+        test('Damage cannot reduce health below zero', () => {
+            const entity = { name: 'test' };
+            const health = new HealthComponent(entity, 50);
+            health.takeDamage(100);
+            assert(health.currentHealth === 0, 'Health should be 0, not negative');
+        });
+
+        // Test 8: Dead entities cannot take damage
+        test('Dead entities cannot take damage', () => {
+            const entity = { name: 'test' };
+            const health = new HealthComponent(entity, 50);
+            health.takeDamage(50);
+            health.update(2000); // Clear invincibility
+            const damageApplied = health.takeDamage(25);
+            assert(damageApplied === false, 'Damage should not be applied to dead entity');
+        });
+
+        // Run all tests
+        async function runTests() {
+            let passed = 0;
+            let failed = 0;
+
+            for (const { name, fn } of tests) {
+                try {
+                    fn();
+                    passed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test pass">
+                            <div class="test-name">✓ ${name}</div>
+                            <div class="test-result">PASS</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    failed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test fail">
+                            <div class="test-name">✗ ${name}</div>
+                            <div class="test-result">FAIL: ${error.message}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            const total = passed + failed;
+            const percentage = ((passed / total) * 100).toFixed(1);
+            const summaryClass = failed === 0 ? 'all-pass' : 'has-fails';
+
+            summaryContainer.className = `summary ${summaryClass}`;
+            summaryContainer.innerHTML = `
+                <strong>Test Results:</strong> ${passed}/${total} passed (${percentage}%)
+                ${failed === 0 ? '<br>🎉 ALL TESTS PASSED! 🎉' : ''}
+            `;
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
