@@ -1,0 +1,76 @@
+{
+  "collectibles": [
+    {
+      "id": "dash_01",
+      "type": "dash",
+      "room": "room_05",
+      "x": 200,
+      "y": 450,
+      "description": "Grants the Dash ability"
+    },
+    {
+      "id": "doubleJump_01",
+      "type": "doubleJump",
+      "room": "room_06",
+      "x": 640,
+      "y": 300,
+      "description": "Grants the Double Jump ability"
+    },
+    {
+      "id": "wallJump_01",
+      "type": "wallJump",
+      "room": "room_04",
+      "x": 900,
+      "y": 350,
+      "description": "Grants the Wall Jump ability"
+    },
+    {
+      "id": "glide_01",
+      "type": "glide",
+      "room": "room_07",
+      "x": 500,
+      "y": 350,
+      "description": "Grants the Glide ability"
+    },
+    {
+      "id": "groundPound_01",
+      "type": "groundPound",
+      "room": "room_03",
+      "x": 640,
+      "y": 400,
+      "description": "Grants the Ground Pound ability"
+    },
+    {
+      "id": "grapple_01",
+      "type": "grapple",
+      "room": "room_08",
+      "x": 800,
+      "y": 400,
+      "description": "Grants the Grappling Hook ability (boss reward)"
+    },
+    {
+      "id": "sprint_01",
+      "type": "sprint",
+      "room": "room_02",
+      "x": 750,
+      "y": 250,
+      "description": "Grants the Sprint ability"
+    },
+    {
+      "id": "healthUp_01",
+      "type": "healthUp",
+      "room": "room_03",
+      "x": 640,
+      "y": 400,
+      "description": "Increases maximum health by 20"
+    },
+    {
+      "id": "key_01_item",
+      "type": "key_01",
+      "room": "room_02",
+      "x": 640,
+      "y": 350,
+      "description": "Unlocks the sealed treasury (room_03)"
+    }
+  ]
+}

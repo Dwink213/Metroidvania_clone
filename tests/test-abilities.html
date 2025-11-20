@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ability System Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .test {
+            margin: 15px 0;
+            padding: 10px;
+            background: #0f0f0f;
+            border-left: 4px solid #555;
+            border-radius: 4px;
+        }
+        .test.pass {
+            border-left-color: #00ff00;
+            background: #0a1a0a;
+        }
+        .test.fail {
+            border-left-color: #ff0000;
+            background: #1a0a0a;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .summary.all-pass {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .summary.has-fails {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 ABILITY SYSTEM TEST SUITE 🎯</h1>
+        <div id="test-results"></div>
+        <div id="test-summary" class="summary"></div>
+    </div>
+
+    <script type="module">
+        // Mock ability definitions
+        const AbilityDefinitions = {
+            dash: { id: 'dash', name: 'Dash', description: 'Quick burst', color: 0x00aaff },
+            doubleJump: { id: 'doubleJump', name: 'Double Jump', description: 'Jump twice', color: 0x88ff00 },
+            wallJump: { id: 'wallJump', name: 'Wall Jump', description: 'Jump off walls', color: 0xff8800 }
+        };
+
+        // Mock EventBus
+        class MockEventBus {
+            constructor() {
+                this.events = {};
+            }
+            on(event, callback) {
+                if (!this.events[event]) this.events[event] = [];
+                this.events[event].push(callback);
+            }
+            emit(event, data) {
+                if (!this.events[event]) return;
+                this.events[event].forEach(cb => cb(data));
+            }
+            clear() {
+                this.events = {};
+            }
+        }
+
+        // Mock AbilityManager
+        class AbilityManager {
+            constructor() {
+                this.unlockedAbilities = new Map();
+                this.collectedItems = new Set();
+            }
+            unlockAbility(abilityId) {
+                if (this.hasAbility(abilityId)) return false;
+                if (!AbilityDefinitions[abilityId]) return false;
+                this.unlockedAbilities.set(abilityId, Date.now());
+                return true;
+            }
+            hasAbility(abilityId) {
+                return this.unlockedAbilities.has(abilityId);
+            }
+            getUnlockedAbilities() {
+                return Array.from(this.unlockedAbilities.keys());
+            }
+            collectItem(collectibleId, abilityType) {
+                if (this.collectedItems.has(collectibleId)) return false;
+                this.collectedItems.add(collectibleId);
+                this.unlockAbility(abilityType);
+                return true;
+            }
+            getUnlockProgress() {
+                const total = Object.keys(AbilityDefinitions).length;
+                const unlocked = this.unlockedAbilities.size;
+                return {
+                    unlocked: unlocked,
+                    total: total,
+                    percentage: (unlocked / total) * 100
+                };
+            }
+            exportState() {
+                return {
+                    unlockedAbilities: Array.from(this.unlockedAbilities.keys()),
+                    collectedItems: Array.from(this.collectedItems)
+                };
+            }
+            importState(state) {
+                this.unlockedAbilities.clear();
+                this.collectedItems.clear();
+                if (state.unlockedAbilities) {
+                    state.unlockedAbilities.forEach(id => {
+                        this.unlockedAbilities.set(id, Date.now());
+                    });
+                }
+                if (state.collectedItems) {
+                    state.collectedItems.forEach(id => {
+                        this.collectedItems.add(id);
+                    });
+                }
+            }
+        }
+
+        // Mock SaveManager
+        class SaveManager {
+            constructor() {
+                this.saveKey = 'test_metroidvania_save';
+                this.version = '1.0.0';
+            }
+            saveGame(gameState) {
+                try {
+                    const saveData = {
+                        version: this.version,
+                        timestamp: new Date().toISOString(),
+                        ...gameState
+                    };
+                    localStorage.setItem(this.saveKey, JSON.stringify(saveData));
+                    return true;
+                } catch (error) {
+                    return false;
+                }
+            }
+            loadGame() {
+                try {
+                    const data = localStorage.getItem(this.saveKey);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    return null;
+                }
+            }
+            hasSaveData() {
+                return localStorage.getItem(this.saveKey) !== null;
+            }
+            deleteSave() {
+                try {
+                    localStorage.removeItem(this.saveKey);
+                    return true;
+                } catch (error) {
+                    return false;
+                }
+            }
+        }
+
+        // Test runner
+        const tests = [];
+        const resultsContainer = document.getElementById('test-results');
+        const summaryContainer = document.getElementById('test-summary');
+
+        function test(name, fn) {
+            tests.push({ name, fn });
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        // Test 1: AbilityManager initialization
+        test('AbilityManager initializes correctly', () => {
+            const manager = new AbilityManager();
+            assert(manager.getUnlockedAbilities().length === 0, 'Should start with no abilities');
+        });
+
+        // Test 2: Unlock ability
+        test('AbilityManager can unlock abilities', () => {
+            const manager = new AbilityManager();
+            const success = manager.unlockAbility('dash');
+            assert(success === true, 'Should unlock successfully');
+            assert(manager.hasAbility('dash') === true, 'Should have dash ability');
+        });
+
+        // Test 3: Duplicate unlock prevention
+        test('AbilityManager prevents duplicate unlocks', () => {
+            const manager = new AbilityManager();
+            manager.unlockAbility('dash');
+            const success = manager.unlockAbility('dash');
+            assert(success === false, 'Should not unlock twice');
+        });
+
+        // Test 4: Get unlocked abilities
+        test('AbilityManager tracks all unlocked abilities', () => {
+            const manager = new AbilityManager();
+            manager.unlockAbility('dash');
+            manager.unlockAbility('doubleJump');
+            const abilities = manager.getUnlockedAbilities();
+            assert(abilities.length === 2, 'Should have 2 abilities');
+            assert(abilities.includes('dash'), 'Should include dash');
+            assert(abilities.includes('doubleJump'), 'Should include doubleJump');
+        });
+
+        // Test 5: Collectible pickup
+        test('AbilityManager handles collectible pickup', () => {
+            const manager = new AbilityManager();
+            const collected = manager.collectItem('dash_01', 'dash');
+            assert(collected === true, 'Should collect successfully');
+            assert(manager.hasAbility('dash') === true, 'Should unlock ability');
+        });
+
+        // Test 6: Progress tracking
+        test('AbilityManager calculates unlock progress', () => {
+            const manager = new AbilityManager();
+            manager.unlockAbility('dash');
+            const progress = manager.getUnlockProgress();
+            assert(progress.unlocked === 1, 'Should have 1 unlocked');
+            assert(progress.total === 3, 'Should have 3 total');
+        });
+
+        // Test 7: Export state
+        test('AbilityManager exports state correctly', () => {
+            const manager = new AbilityManager();
+            manager.unlockAbility('dash');
+            manager.collectItem('dash_01', 'dash');
+            const state = manager.exportState();
+            assert(state.unlockedAbilities.includes('dash'), 'Should include dash');
+            assert(state.collectedItems.has('dash_01'), 'Should include item');
+        });
+
+        // Test 8: Import state
+        test('AbilityManager imports state correctly', () => {
+            const manager = new AbilityManager();
+            const state = {
+                unlockedAbilities: ['dash', 'doubleJump'],
+                collectedItems: ['dash_01', 'doubleJump_01']
+            };
+            manager.importState(state);
+            assert(manager.hasAbility('dash'), 'Should have dash');
+            assert(manager.hasAbility('doubleJump'), 'Should have doubleJump');
+        });
+
+        // Test 9: SaveManager save
+        test('SaveManager can save game state', () => {
+            const saveManager = new SaveManager();
+            saveManager.deleteSave(); // Clean up
+            const gameState = { playerHealth: 75, currentRoom: 'room_02', abilities: ['dash'] };
+            const success = saveManager.saveGame(gameState);
+            assert(success === true, 'Should save successfully');
+            assert(saveManager.hasSaveData() === true, 'Should have save data');
+        });
+
+        // Test 10: SaveManager load
+        test('SaveManager can load game state', () => {
+            const saveManager = new SaveManager();
+            const gameState = { playerHealth: 75, currentRoom: 'room_02', abilities: ['dash'] };
+            saveManager.saveGame(gameState);
+            const loaded = saveManager.loadGame();
+            assert(loaded !== null, 'Should load data');
+            assert(loaded.playerHealth === 75, 'Should restore health');
+            assert(loaded.currentRoom === 'room_02', 'Should restore room');
+        });
+
+        // Test 11: SaveManager persistence
+        test('SaveManager persists across instances', () => {
+            const saveManager1 = new SaveManager();
+            saveManager1.saveGame({ playerHealth: 50 });
+
+            const saveManager2 = new SaveManager();
+            const loaded = saveManager2.loadGame();
+            assert(loaded.playerHealth === 50, 'Should persist');
+
+            // Clean up
+            saveManager2.deleteSave();
+        });
+
+        // Run all tests
+        async function runTests() {
+            let passed = 0;
+            let failed = 0;
+
+            for (const { name, fn } of tests) {
+                try {
+                    fn();
+                    passed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test pass">
+                            <div class="test-name">✓ ${name}</div>
+                            <div class="test-result">PASS</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    failed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test fail">
+                            <div class="test-name">✗ ${name}</div>
+                            <div class="test-result">FAIL: ${error.message}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            const total = passed + failed;
+            const percentage = ((passed / total) * 100).toFixed(1);
+            const summaryClass = failed === 0 ? 'all-pass' : 'has-fails';
+
+            summaryContainer.className = `summary ${summaryClass}`;
+            summaryContainer.innerHTML = `
+                <strong>Test Results:</strong> ${passed}/${total} passed (${percentage}%)
+                ${failed === 0 ? '<br>🎉 ALL TESTS PASSED! 🎉' : ''}
+            `;
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
