@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Player System Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: monospace;
+        }
+        #test-results {
+            margin-bottom: 20px;
+        }
+        .pass { color: #0f0; }
+        .fail { color: #f00; }
+    </style>
+</head>
+<body>
+    <h1>Player System Test</h1>
+    <div id="test-results"></div>
+    <div id="game"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <script type="module">
+        import EventBus from '../src/EventBus.js';
+        import InputManager from '../src/player/InputManager.js';
+        import PlayerController from '../src/player/PlayerController.js';
+        import PhysicsConstants from '../src/player/PhysicsConstants.js';
+
+        const results = document.getElementById('test-results');
+        let testCount = 0;
+        let passCount = 0;
+
+        function test(name, condition) {
+            testCount++;
+            const pass = condition;
+            if (pass) passCount++;
+            results.innerHTML += `<div class="${pass ? 'pass' : 'fail'}">` +
+                `${pass ? '✓' : '✗'} ${name}</div>`;
+        }
+
+        class TestScene extends Phaser.Scene {
+            create() {
+                // Create test environment
+                this.input = new InputManager(this);
+                this.player = new PlayerController(this, 400, 300);
+
+                // Create a ground platform
+                const ground = this.add.rectangle(400, 650, 800, 50, 0x666666);
+                this.physics.add.existing(ground, true);
+                this.physics.add.collider(this.player.sprite, ground);
+
+                // Run tests after a brief delay
+                this.time.delayedCall(100, () => this.runTests());
+            }
+
+            runTests() {
+                // Test 1: Player sprite exists
+                test('Player sprite created', this.player.sprite !== undefined);
+
+                // Test 2: Player has physics body
+                test('Player has physics body', this.player.sprite.body !== undefined);
+
+                // Test 3: EventBus exists
+                test('EventBus exists', EventBus !== undefined);
+
+                // Test 4: Physics constants defined
+                test('MOVE_SPEED defined', PhysicsConstants.MOVE_SPEED === 200);
+                test('JUMP_VELOCITY defined', PhysicsConstants.JUMP_VELOCITY === -500);
+                test('DASH_SPEED defined', PhysicsConstants.DASH_SPEED === 400);
+                test('COYOTE_TIME defined', PhysicsConstants.COYOTE_TIME === 0.1);
+
+                // Test 5: Player methods exist
+                test('jump() method exists', typeof this.player.jump === 'function');
+                test('dash() method exists', typeof this.player.dash === 'function');
+                test('isGrounded() method exists', typeof this.player.isGrounded === 'function');
+                test('getPosition() method exists', typeof this.player.getPosition === 'function');
+
+                // Test 6: Player abilities structure
+                test('Abilities object exists', this.player.abilities !== undefined);
+                test('Dash ability flag exists', this.player.abilities.hasOwnProperty('dash'));
+
+                // Test 7: Player can unlock abilities
+                this.player.unlockAbility('dash');
+                test('Unlock dash ability works', this.player.abilities.dash === true);
+
+                // Test 8: Player events emit correctly
+                let jumpEmitted = false;
+                EventBus.on('player:jumped', () => { jumpEmitted = true; });
+                this.player.jump();
+                test('player:jumped event emits', jumpEmitted);
+
+                // Test 9: Input manager methods exist
+                test('isLeftPressed() exists', typeof this.input.isLeftPressed === 'function');
+                test('isRightPressed() exists', typeof this.input.isRightPressed === 'function');
+                test('isJumpPressed() exists', typeof this.input.isJumpPressed === 'function');
+
+                // Summary
+                results.innerHTML += `<hr><div style="font-size: 20px;">` +
+                    `Tests: ${passCount}/${testCount} passed ` +
+                    `(${Math.round(passCount/testCount*100)}%)</div>`;
+
+                if (passCount === testCount) {
+                    results.innerHTML += `<div class="pass" style="font-size: 18px;">` +
+                        `✓ ALL TESTS PASSED</div>`;
+                } else {
+                    results.innerHTML += `<div class="fail" style="font-size: 18px;">` +
+                        `✗ SOME TESTS FAILED</div>`;
+                }
+            }
+
+            update(time, delta) {
+                if (this.player) {
+                    this.player.update(delta, this.input);
+                }
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game',
+            backgroundColor: '#2d2d2d',
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 800 },
+                    debug: true
+                }
+            },
+            scene: TestScene
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
