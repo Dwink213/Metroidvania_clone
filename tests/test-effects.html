@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Effects System Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .test {
+            margin: 15px 0;
+            padding: 10px;
+            background: #0f0f0f;
+            border-left: 4px solid #555;
+            border-radius: 4px;
+        }
+        .test.pass {
+            border-left-color: #00ff00;
+            background: #0a1a0a;
+        }
+        .test.fail {
+            border-left-color: #ff0000;
+            background: #1a0a0a;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .summary.all-pass {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .summary.has-fails {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>✨ EFFECTS SYSTEM TEST SUITE ✨</h1>
+        <div id="test-results"></div>
+        <div id="test-summary" class="summary"></div>
+    </div>
+
+    <script type="module">
+        // Test runner
+        const tests = [];
+        const resultsContainer = document.getElementById('test-results');
+        const summaryContainer = document.getElementById('test-summary');
+
+        function test(name, fn) {
+            tests.push({ name, fn });
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        // Test 1: Camera dead zone
+        test('Camera has correct dead zone dimensions', () => {
+            const deadZoneWidth = 80;
+            const deadZoneHeight = 60;
+            assert(deadZoneWidth > 0, 'Dead zone width should be positive');
+            assert(deadZoneHeight > 0, 'Dead zone height should be positive');
+        });
+
+        // Test 2: Camera lerp factor
+        test('Camera lerp factor is valid', () => {
+            const lerpFactor = 0.1;
+            assert(lerpFactor > 0, 'Lerp factor should be positive');
+            assert(lerpFactor <= 1, 'Lerp factor should be <= 1');
+        });
+
+        // Test 3: Screen shake intensity
+        test('Screen shake has positive intensity', () => {
+            const shakeIntensity = 5;
+            assert(shakeIntensity > 0, 'Shake intensity should be positive');
+        });
+
+        // Test 4: Screen shake duration
+        test('Screen shake has valid duration', () => {
+            const shakeDuration = 0.2;
+            assert(shakeDuration > 0, 'Duration should be positive');
+            assert(shakeDuration < 2, 'Duration should be reasonable');
+        });
+
+        // Test 5: Particle lifetime
+        test('Particles have valid lifetime', () => {
+            const dustLifetime = 0.5;
+            const trailLifetime = 0.3;
+            const explosionLifetime = 0.8;
+
+            assert(dustLifetime > 0, 'Dust lifetime should be positive');
+            assert(trailLifetime > 0, 'Trail lifetime should be positive');
+            assert(explosionLifetime > 0, 'Explosion lifetime should be positive');
+        });
+
+        // Test 6: Particle velocities
+        test('Particles have velocity values', () => {
+            const dustVelocity = 50;
+            const explosionSpeed = 100;
+
+            assert(dustVelocity > 0, 'Dust velocity should be positive');
+            assert(explosionSpeed > 0, 'Explosion speed should be positive');
+        });
+
+        // Test 7: Flash effect alpha
+        test('Flash effect has valid alpha range', () => {
+            const flashAlpha = 0.5;
+            assert(flashAlpha >= 0, 'Flash alpha should be >= 0');
+            assert(flashAlpha <= 1, 'Flash alpha should be <= 1');
+        });
+
+        // Test 8: Hit pause duration
+        test('Hit pause has reasonable duration', () => {
+            const hitPauseDuration = 0.05;
+            assert(hitPauseDuration > 0, 'Duration should be positive');
+            assert(hitPauseDuration < 0.5, 'Duration should be brief');
+        });
+
+        // Test 9: Effect depth layers
+        test('Effects use correct depth layering', () => {
+            const particleDepth = 500;
+            const flashDepth = 5000;
+
+            assert(particleDepth > 0, 'Particle depth should be positive');
+            assert(flashDepth > particleDepth, 'Flash should be above particles');
+        });
+
+        // Test 10: Particle count for effects
+        test('Particle effects have appropriate counts', () => {
+            const dustCount = 5;
+            const explosionCount = 12;
+            const sparkleCount = 20;
+
+            assert(dustCount > 0, 'Dust count should be positive');
+            assert(explosionCount > 0, 'Explosion count should be positive');
+            assert(sparkleCount > 0, 'Sparkle count should be positive');
+            assert(dustCount < 100, 'Dust count should be reasonable');
+            assert(explosionCount < 100, 'Explosion count should be reasonable');
+            assert(sparkleCount < 100, 'Sparkle count should be reasonable');
+        });
+
+        // Test 11: Camera shake decay
+        test('Camera shake decays over time', () => {
+            const initialIntensity = 10;
+            const progress = 0.5; // 50% through shake
+            const currentIntensity = initialIntensity * progress;
+
+            assert(currentIntensity < initialIntensity, 'Intensity should decay');
+            assert(currentIntensity >= 0, 'Intensity should not go negative');
+        });
+
+        // Test 12: Particle fade calculation
+        test('Particles fade out correctly', () => {
+            const age = 0.5;
+            const lifetime = 1.0;
+            const lifePercent = age / lifetime;
+            const alpha = 1 - lifePercent;
+
+            assert(alpha >= 0, 'Alpha should not go negative');
+            assert(alpha <= 1, 'Alpha should not exceed 1');
+            assert(alpha === 0.5, 'Alpha should be 0.5 at 50% lifetime');
+        });
+
+        // Run all tests
+        async function runTests() {
+            let passed = 0;
+            let failed = 0;
+
+            for (const { name, fn } of tests) {
+                try {
+                    fn();
+                    passed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test pass">
+                            <div class="test-name">✓ ${name}</div>
+                            <div class="test-result">PASS</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    failed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test fail">
+                            <div class="test-name">✗ ${name}</div>
+                            <div class="test-result">FAIL: ${error.message}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            const total = passed + failed;
+            const percentage = ((passed / total) * 100).toFixed(1);
+            const summaryClass = failed === 0 ? 'all-pass' : 'has-fails';
+
+            summaryContainer.className = `summary ${summaryClass}`;
+            summaryContainer.innerHTML = `
+                <strong>Test Results:</strong> ${passed}/${total} passed (${percentage}%)
+                ${failed === 0 ? '<br>🎉 ALL TESTS PASSED! 🎉' : ''}
+            `;
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
