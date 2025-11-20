@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI System Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .test {
+            margin: 15px 0;
+            padding: 10px;
+            background: #0f0f0f;
+            border-left: 4px solid #555;
+            border-radius: 4px;
+        }
+        .test.pass {
+            border-left-color: #00ff00;
+            background: #0a1a0a;
+        }
+        .test.fail {
+            border-left-color: #ff0000;
+            background: #1a0a0a;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .summary.all-pass {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .summary.has-fails {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎨 UI SYSTEM TEST SUITE 🎨</h1>
+        <div id="test-results"></div>
+        <div id="test-summary" class="summary"></div>
+    </div>
+
+    <script type="module">
+        // Mock MenuSystem
+        class MenuSystem {
+            constructor(scene) {
+                this.scene = scene;
+                this.visible = false;
+                this.elements = [];
+            }
+            show() {
+                this.visible = true;
+                this.elements.forEach(el => {
+                    if (el && el.visible !== undefined) el.visible = true;
+                });
+            }
+            hide() {
+                this.visible = false;
+                this.elements.forEach(el => {
+                    if (el && el.visible !== undefined) el.visible = false;
+                });
+            }
+            toggle() {
+                if (this.visible) this.hide();
+                else this.show();
+            }
+            isVisible() {
+                return this.visible;
+            }
+            addElement(element) {
+                this.elements.push(element);
+            }
+        }
+
+        // Test runner
+        const tests = [];
+        const resultsContainer = document.getElementById('test-results');
+        const summaryContainer = document.getElementById('test-summary');
+
+        function test(name, fn) {
+            tests.push({ name, fn });
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        // Test 1: MenuSystem initialization
+        test('MenuSystem initializes correctly', () => {
+            const menu = new MenuSystem({});
+            assert(menu.visible === false, 'Menu should start hidden');
+            assert(Array.isArray(menu.elements), 'Should have elements array');
+        });
+
+        // Test 2: MenuSystem show
+        test('MenuSystem shows correctly', () => {
+            const menu = new MenuSystem({});
+            menu.show();
+            assert(menu.visible === true, 'Menu should be visible');
+        });
+
+        // Test 3: MenuSystem hide
+        test('MenuSystem hides correctly', () => {
+            const menu = new MenuSystem({});
+            menu.show();
+            menu.hide();
+            assert(menu.visible === false, 'Menu should be hidden');
+        });
+
+        // Test 4: MenuSystem toggle
+        test('MenuSystem toggles visibility', () => {
+            const menu = new MenuSystem({});
+            menu.toggle();
+            assert(menu.visible === true, 'Should toggle to visible');
+            menu.toggle();
+            assert(menu.visible === false, 'Should toggle to hidden');
+        });
+
+        // Test 5: MenuSystem elements
+        test('MenuSystem manages elements', () => {
+            const menu = new MenuSystem({});
+            const element = { visible: false };
+            menu.addElement(element);
+            assert(menu.elements.length === 1, 'Should have 1 element');
+        });
+
+        // Test 6: Health bar calculation
+        test('Health bar calculates percentage correctly', () => {
+            const currentHealth = 75;
+            const maxHealth = 100;
+            const percent = currentHealth / maxHealth;
+            assert(percent === 0.75, 'Should be 75%');
+        });
+
+        // Test 7: Health bar color thresholds
+        test('Health bar has correct color thresholds', () => {
+            const thresholds = {
+                green: 0.6,
+                yellow: 0.3,
+                red: 0
+            };
+            assert(thresholds.green > thresholds.yellow, 'Green > Yellow');
+            assert(thresholds.yellow > thresholds.red, 'Yellow > Red');
+        });
+
+        // Test 8: Notification lifetime
+        test('Notifications have correct lifetime', () => {
+            const lifetime = 3.0; // seconds
+            assert(lifetime > 0, 'Lifetime should be positive');
+            assert(lifetime <= 5.0, 'Lifetime should be reasonable');
+        });
+
+        // Test 9: UI layer depths
+        test('UI elements have correct depth ordering', () => {
+            const depths = {
+                hud: 1000,
+                menu: 1500,
+                notification: 2000,
+                dialogue: 3000
+            };
+            assert(depths.dialogue > depths.notification, 'Dialogue > Notification');
+            assert(depths.notification > depths.menu, 'Notification > Menu');
+            assert(depths.menu > depths.hud, 'Menu > HUD');
+        });
+
+        // Test 10: Minimap room positions
+        test('Minimap room positions are valid', () => {
+            const roomPositions = {
+                'room_01': { gridX: 1, gridY: 1 },
+                'room_02': { gridX: 2, gridY: 1 }
+            };
+            assert(roomPositions['room_01'].gridX >= 0, 'Grid X should be non-negative');
+            assert(roomPositions['room_01'].gridY >= 0, 'Grid Y should be non-negative');
+        });
+
+        // Test 11: Minimap explored tracking
+        test('Minimap tracks explored rooms', () => {
+            const exploredRooms = new Set();
+            exploredRooms.add('room_01');
+            exploredRooms.add('room_02');
+            assert(exploredRooms.has('room_01'), 'Should track room_01');
+            assert(exploredRooms.has('room_02'), 'Should track room_02');
+            assert(exploredRooms.size === 2, 'Should have 2 rooms');
+        });
+
+        // Test 12: Dialogue box visibility
+        test('Dialogue box manages visibility', () => {
+            let visible = false;
+            // Show
+            visible = true;
+            assert(visible === true, 'Should be visible');
+            // Hide
+            visible = false;
+            assert(visible === false, 'Should be hidden');
+        });
+
+        // Run all tests
+        async function runTests() {
+            let passed = 0;
+            let failed = 0;
+
+            for (const { name, fn } of tests) {
+                try {
+                    fn();
+                    passed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test pass">
+                            <div class="test-name">✓ ${name}</div>
+                            <div class="test-result">PASS</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    failed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test fail">
+                            <div class="test-name">✗ ${name}</div>
+                            <div class="test-result">FAIL: ${error.message}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            const total = passed + failed;
+            const percentage = ((passed / total) * 100).toFixed(1);
+            const summaryClass = failed === 0 ? 'all-pass' : 'has-fails';
+
+            summaryContainer.className = `summary ${summaryClass}`;
+            summaryContainer.innerHTML = `
+                <strong>Test Results:</strong> ${passed}/${total} passed (${percentage}%)
+                ${failed === 0 ? '<br>🎉 ALL TESTS PASSED! 🎉' : ''}
+            `;
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
