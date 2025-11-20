@@ -1,0 +1,95 @@
+{
+  "room_01": [],
+  "room_02": [
+    {
+      "id": "enemy_r02_001",
+      "type": "patroller",
+      "x": 400,
+      "y": 600
+    },
+    {
+      "id": "enemy_r02_002",
+      "type": "patroller",
+      "x": 900,
+      "y": 600
+    }
+  ],
+  "room_03": [
+    {
+      "id": "enemy_r03_001",
+      "type": "flyer",
+      "x": 640,
+      "y": 300
+    }
+  ],
+  "room_04": [
+    {
+      "id": "enemy_r04_001",
+      "type": "patroller",
+      "x": 500,
+      "y": 600
+    },
+    {
+      "id": "enemy_r04_002",
+      "type": "flyer",
+      "x": 800,
+      "y": 300
+    },
+    {
+      "id": "enemy_r04_003",
+      "type": "shooter",
+      "x": 1000,
+      "y": 350
+    }
+  ],
+  "room_05": [
+    {
+      "id": "enemy_r05_001",
+      "type": "charger",
+      "x": 600,
+      "y": 600
+    }
+  ],
+  "room_06": [
+    {
+      "id": "enemy_r06_001",
+      "type": "flyer",
+      "x": 400,
+      "y": 250
+    },
+    {
+      "id": "enemy_r06_002",
+      "type": "flyer",
+      "x": 800,
+      "y": 450
+    }
+  ],
+  "room_07": [
+    {
+      "id": "enemy_r07_001",
+      "type": "charger",
+      "x": 400,
+      "y": 600
+    },
+    {
+      "id": "enemy_r07_002",
+      "type": "shooter",
+      "x": 900,
+      "y": 250
+    },
+    {
+      "id": "enemy_r07_003",
+      "type": "patroller",
+      "x": 700,
+      "y": 600
+    }
+  ],
+  "room_08": [
+    {
+      "id": "boss_001",
+      "type": "miniBoss",
+      "x": 1200,
+      "y": 700
+    }
+  ]
+}

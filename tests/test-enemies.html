@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enemy System Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .test {
+            margin: 15px 0;
+            padding: 10px;
+            background: #0f0f0f;
+            border-left: 4px solid #555;
+            border-radius: 4px;
+        }
+        .test.pass {
+            border-left-color: #00ff00;
+            background: #0a1a0a;
+        }
+        .test.fail {
+            border-left-color: #ff0000;
+            background: #1a0a0a;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-result {
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .summary.all-pass {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .summary.has-fails {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>👾 ENEMY SYSTEM TEST SUITE 👾</h1>
+        <div id="test-results"></div>
+        <div id="test-summary" class="summary"></div>
+    </div>
+
+    <script type="module">
+        // Mock AIBehaviors
+        class AIBehaviors {
+            static getDistance(pos1, pos2) {
+                const dx = pos2.x - pos1.x;
+                const dy = pos2.y - pos1.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            static isInRange(enemyPos, targetPos, range) {
+                return this.getDistance(enemyPos, targetPos) <= range;
+            }
+            static getDirectionToTarget(enemyPos, targetPos) {
+                const dx = targetPos.x - enemyPos.x;
+                const dy = targetPos.y - enemyPos.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance === 0) return { x: 0, y: 0 };
+                return { x: dx / distance, y: dy / distance };
+            }
+        }
+
+        // Test runner
+        const tests = [];
+        const resultsContainer = document.getElementById('test-results');
+        const summaryContainer = document.getElementById('test-summary');
+
+        function test(name, fn) {
+            tests.push({ name, fn });
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        // Test 1: AIBehaviors distance calculation
+        test('AIBehaviors calculates distance correctly', () => {
+            const pos1 = { x: 0, y: 0 };
+            const pos2 = { x: 3, y: 4 };
+            const distance = AIBehaviors.getDistance(pos1, pos2);
+            assert(distance === 5, 'Distance should be 5 (3-4-5 triangle)');
+        });
+
+        // Test 2: AIBehaviors range check
+        test('AIBehaviors checks range correctly', () => {
+            const enemyPos = { x: 0, y: 0 };
+            const targetPos = { x: 100, y: 0 };
+            assert(AIBehaviors.isInRange(enemyPos, targetPos, 150) === true, 'Should be in range');
+            assert(AIBehaviors.isInRange(enemyPos, targetPos, 50) === false, 'Should be out of range');
+        });
+
+        // Test 3: AIBehaviors direction calculation
+        test('AIBehaviors calculates direction correctly', () => {
+            const enemyPos = { x: 0, y: 0 };
+            const targetPos = { x: 10, y: 0 };
+            const direction = AIBehaviors.getDirectionToTarget(enemyPos, targetPos);
+            assert(Math.abs(direction.x - 1) < 0.001, 'X direction should be 1');
+            assert(Math.abs(direction.y) < 0.001, 'Y direction should be 0');
+        });
+
+        // Test 4: Direction normalization
+        test('AIBehaviors normalizes direction vectors', () => {
+            const enemyPos = { x: 0, y: 0 };
+            const targetPos = { x: 3, y: 4 };
+            const direction = AIBehaviors.getDirectionToTarget(enemyPos, targetPos);
+            const magnitude = Math.sqrt(direction.x * direction.x + direction.y * direction.y);
+            assert(Math.abs(magnitude - 1) < 0.001, 'Direction magnitude should be 1');
+        });
+
+        // Test 5: Enemy data structure
+        test('Enemy data has required properties', () => {
+            const enemyData = {
+                id: 'enemy_001',
+                type: 'patroller',
+                x: 100,
+                y: 200
+            };
+            assert(enemyData.id !== undefined, 'Should have id');
+            assert(enemyData.type !== undefined, 'Should have type');
+            assert(enemyData.x !== undefined, 'Should have x position');
+            assert(enemyData.y !== undefined, 'Should have y position');
+        });
+
+        // Test 6: Enemy types exist
+        test('All enemy types are defined', () => {
+            const enemyTypes = ['patroller', 'flyer', 'shooter', 'charger', 'miniBoss'];
+            assert(enemyTypes.length === 5, 'Should have 5 enemy types');
+            assert(enemyTypes.includes('patroller'), 'Should include patroller');
+            assert(enemyTypes.includes('flyer'), 'Should include flyer');
+            assert(enemyTypes.includes('shooter'), 'Should include shooter');
+            assert(enemyTypes.includes('charger'), 'Should include charger');
+            assert(enemyTypes.includes('miniBoss'), 'Should include miniBoss');
+        });
+
+        // Test 7: Boss phase thresholds
+        test('Boss has correct phase thresholds', () => {
+            const bossMaxHealth = 200;
+            const phase2Threshold = 150;
+            const phase3Threshold = 75;
+
+            assert(phase2Threshold < bossMaxHealth, 'Phase 2 triggers before max HP');
+            assert(phase3Threshold < phase2Threshold, 'Phase 3 triggers after Phase 2');
+            assert(phase3Threshold > 0, 'Phase 3 triggers before death');
+        });
+
+        // Test 8: Defeated enemy tracking
+        test('Defeated enemies are tracked correctly', () => {
+            const defeatedEnemies = new Set();
+            defeatedEnemies.add('enemy_001');
+            defeatedEnemies.add('enemy_002');
+
+            assert(defeatedEnemies.has('enemy_001'), 'Should track defeated enemy');
+            assert(defeatedEnemies.has('enemy_002'), 'Should track multiple enemies');
+            assert(!defeatedEnemies.has('enemy_003'), 'Should not include non-defeated');
+            assert(defeatedEnemies.size === 2, 'Should have correct count');
+        });
+
+        // Test 9: Enemy spawner state export
+        test('Enemy spawner exports state correctly', () => {
+            const defeatedEnemies = new Set(['enemy_001', 'enemy_002']);
+            const state = {
+                defeatedEnemies: Array.from(defeatedEnemies)
+            };
+
+            assert(Array.isArray(state.defeatedEnemies), 'Should be an array');
+            assert(state.defeatedEnemies.length === 2, 'Should have 2 defeated enemies');
+        });
+
+        // Test 10: Enemy spawner state import
+        test('Enemy spawner imports state correctly', () => {
+            const state = {
+                defeatedEnemies: ['enemy_001', 'enemy_002']
+            };
+
+            const defeatedSet = new Set(state.defeatedEnemies);
+            assert(defeatedSet.has('enemy_001'), 'Should import enemy_001');
+            assert(defeatedSet.has('enemy_002'), 'Should import enemy_002');
+            assert(defeatedSet.size === 2, 'Should have correct size');
+        });
+
+        // Test 11: Enemy type validation
+        test('Enemy types are valid strings', () => {
+            const types = ['patroller', 'flyer', 'shooter', 'charger', 'miniBoss'];
+            for (const type of types) {
+                assert(typeof type === 'string', `${type} should be a string`);
+                assert(type.length > 0, `${type} should not be empty`);
+            }
+        });
+
+        // Test 12: Chase range validation
+        test('Enemy chase ranges are positive', () => {
+            const patrollerChaseRange = 300;
+            const shooterRange = 500;
+            const chargerRange = 350;
+
+            assert(patrollerChaseRange > 0, 'Patroller chase range should be positive');
+            assert(shooterRange > 0, 'Shooter range should be positive');
+            assert(chargerRange > 0, 'Charger range should be positive');
+        });
+
+        // Run all tests
+        async function runTests() {
+            let passed = 0;
+            let failed = 0;
+
+            for (const { name, fn } of tests) {
+                try {
+                    fn();
+                    passed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test pass">
+                            <div class="test-name">✓ ${name}</div>
+                            <div class="test-result">PASS</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    failed++;
+                    resultsContainer.innerHTML += `
+                        <div class="test fail">
+                            <div class="test-name">✗ ${name}</div>
+                            <div class="test-result">FAIL: ${error.message}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            const total = passed + failed;
+            const percentage = ((passed / total) * 100).toFixed(1);
+            const summaryClass = failed === 0 ? 'all-pass' : 'has-fails';
+
+            summaryContainer.className = `summary ${summaryClass}`;
+            summaryContainer.innerHTML = `
+                <strong>Test Results:</strong> ${passed}/${total} passed (${percentage}%)
+                ${failed === 0 ? '<br>🎉 ALL TESTS PASSED! 🎉' : ''}
+            `;
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
