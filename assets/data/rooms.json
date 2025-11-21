@@ -4,7 +4,7 @@
     "name": "Starting Chamber",
     "width": 1280,
     "height": 704,
-    "backgroundColor": 0x2a2a2a,
+    "backgroundColor": 2763306,
     "spawnPoint": { "x": 320, "y": 480 },
     "connections": {
       "north": { "roomId": "room_03", "doorType": "locked", "requires": "key_01", "x": 640, "y": 32 },
@@ -27,7 +27,7 @@
     "name": "Eastern Corridor",
     "width": 1280,
     "height": 704,
-    "backgroundColor": 0x1a2a3a,
+    "backgroundColor": 1715770,
     "spawnPoint": { "x": 100, "y": 480 },
     "connections": {
       "west": { "roomId": "room_01", "doorType": "open", "x": 32, "y": 352 },
@@ -51,7 +51,7 @@
     "name": "Locked Treasury",
     "width": 1280,
     "height": 704,
-    "backgroundColor": 0x3a2a1a,
+    "backgroundColor": 3812890,
     "spawnPoint": { "x": 640, "y": 600 },
     "connections": {
       "south": { "roomId": "room_01", "doorType": "open", "x": 640, "y": 672 }
@@ -73,7 +73,7 @@
     "name": "Eastern Outpost",
     "width": 1280,
     "height": 704,
-    "backgroundColor": 0x2a1a2a,
+    "backgroundColor": 2759210,
     "spawnPoint": { "x": 100, "y": 480 },
     "connections": {
       "west": { "roomId": "room_02", "doorType": "open", "x": 32, "y": 352 }
@@ -97,7 +97,7 @@
     "name": "Western Chamber",
     "width": 1280,
     "height": 704,
-    "backgroundColor": 0x1a2a1a,
+    "backgroundColor": 1715738,
     "spawnPoint": { "x": 1100, "y": 480 },
     "connections": {
       "east": { "roomId": "room_01", "doorType": "open", "x": 1248, "y": 352 }
@@ -120,7 +120,7 @@
     "name": "Descent Cavern",
     "width": 1280,
     "height": 704,
-    "backgroundColor": 0x1a1a2a,
+    "backgroundColor": 1710634,
     "spawnPoint": { "x": 640, "y": 100 },
     "connections": {
       "north": { "roomId": "room_02", "doorType": "open", "x": 640, "y": 32 },
@@ -147,7 +147,7 @@
     "name": "Antechamber",
     "width": 1280,
     "height": 704,
-    "backgroundColor": 0x2a1a1a,
+    "backgroundColor": 2759194,
     "spawnPoint": { "x": 100, "y": 480 },
     "connections": {
       "north": { "roomId": "room_06", "doorType": "open", "x": 640, "y": 32 },
@@ -173,7 +173,7 @@
     "name": "Boss Chamber",
     "width": 1600,
     "height": 900,
-    "backgroundColor": 0x1a0a0a,
+    "backgroundColor": 1706506,
     "spawnPoint": { "x": 200, "y": 700 },
     "connections": {
       "west": { "roomId": "room_07", "doorType": "open", "x": 32, "y": 450 }

@@ -42,10 +42,13 @@ export default class BootScene extends Phaser.Scene {
             percentText.destroy();
         });
 
-        // Load game data
-        this.load.json('rooms', 'assets/data/rooms.json');
-        this.load.json('enemies', 'assets/data/enemies.json');
-        this.load.json('collectibles', 'assets/data/collectibles.json');
+        // AGGRESSIVE cache-busting: timestamp + random
+        const cacheBust = `?v=${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log('[BootScene] Loading with cache-bust:', cacheBust);
+
+        this.load.json('rooms', `assets/data/rooms.json${cacheBust}`);
+        this.load.json('enemies', `assets/data/enemies.json${cacheBust}`);
+        this.load.json('collectibles', `assets/data/collectibles.json${cacheBust}`);
     }
 
     create() {

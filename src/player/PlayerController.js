@@ -10,8 +10,8 @@ export default class PlayerController {
     constructor(scene, x, y) {
         this.scene = scene;
 
-        // Create sprite (blue rectangle placeholder)
-        this.sprite = scene.add.rectangle(x, y, 32, 32, 0x4488ff);
+        // Create player sprite with character appearance
+        this.sprite = this.createPlayerSprite(scene, x, y);
         scene.physics.add.existing(this.sprite);
         this.sprite.body.setCollideWorldBounds(true);
         this.sprite.body.setMaxVelocity(PhysicsConstants.MOVE_SPEED, PhysicsConstants.MAX_FALL_SPEED);
@@ -88,9 +88,11 @@ export default class PlayerController {
         if (input.isLeftPressed()) {
             targetVelocityX = -PhysicsConstants.MOVE_SPEED;
             this.facing = 'left';
+            this.sprite.scaleX = -1; // Flip sprite left
         } else if (input.isRightPressed()) {
             targetVelocityX = PhysicsConstants.MOVE_SPEED;
             this.facing = 'right';
+            this.sprite.scaleX = 1; // Flip sprite right
         }
 
         // Apply acceleration/friction
@@ -203,6 +205,55 @@ export default class PlayerController {
 
         EventBus.emit('player:dashed', { position: this.getPosition(), direction: dashDirection });
         console.log('SFX: dash');
+    }
+
+    createPlayerSprite(scene, x, y) {
+        // Create container for player character
+        const container = scene.add.container(x, y);
+
+        // Body (rounded rectangle)
+        const body = scene.add.graphics();
+        body.fillStyle(0x4488ff, 1);
+        body.fillRoundedRect(-12, -8, 24, 24, 4);
+
+        // Head (circle)
+        const head = scene.add.graphics();
+        head.fillStyle(0xffcc99, 1);
+        head.fillCircle(0, -18, 8);
+
+        // Eyes
+        const eyes = scene.add.graphics();
+        eyes.fillStyle(0x000000, 1);
+        eyes.fillCircle(-3, -18, 2);
+        eyes.fillCircle(3, -18, 2);
+
+        // Visor/helmet detail
+        const visor = scene.add.graphics();
+        visor.lineStyle(2, 0x3366cc, 1);
+        visor.strokeRect(-10, -6, 20, 10);
+
+        // Arms
+        const arms = scene.add.graphics();
+        arms.fillStyle(0x3366cc, 1);
+        arms.fillRect(-14, -2, 4, 12);
+        arms.fillRect(10, -2, 4, 12);
+
+        // Legs
+        const legs = scene.add.graphics();
+        legs.fillStyle(0x2255aa, 1);
+        legs.fillRect(-8, 16, 6, 10);
+        legs.fillRect(2, 16, 6, 10);
+
+        // Add all parts to container
+        container.add([body, head, eyes, visor, arms, legs]);
+
+        // Store graphics references for animation
+        container.bodyGraphics = body;
+        container.headGraphics = head;
+        container.armsGraphics = arms;
+        container.legsGraphics = legs;
+
+        return container;
     }
 
     isGrounded() {

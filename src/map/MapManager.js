@@ -73,33 +73,87 @@ export default class MapManager {
         // Set background color
         this.scene.cameras.main.setBackgroundColor(room.backgroundColor || 0x2a2a2a);
 
-        // Create platforms
+        // Create platforms with enhanced visuals
         if (room.platforms) {
             room.platforms.forEach(platform => {
-                const rect = this.scene.add.rectangle(
+                const container = this.scene.add.container(
                     platform.x + platform.width / 2,
-                    platform.y + platform.height / 2,
-                    platform.width,
-                    platform.height,
-                    0x8b7355
+                    platform.y + platform.height / 2
                 );
-                this.scene.physics.add.existing(rect, true); // true = static body
-                this.currentRoomObjects.platforms.push(rect);
+
+                const graphics = this.scene.add.graphics();
+
+                // Shadow/depth
+                graphics.fillStyle(0x4a3a2a, 1);
+                graphics.fillRect(-platform.width / 2 + 2, -platform.height / 2 + 2, platform.width, platform.height);
+
+                // Main platform body (stone texture)
+                graphics.fillStyle(0x8b7355, 1);
+                graphics.fillRect(-platform.width / 2, -platform.height / 2, platform.width, platform.height);
+
+                // Highlight edge
+                graphics.fillStyle(0xa08566, 1);
+                graphics.fillRect(-platform.width / 2, -platform.height / 2, platform.width, 3);
+
+                // Texture details (random cracks/stones)
+                for (let i = 0; i < platform.width / 40; i++) {
+                    const x = -platform.width / 2 + Math.random() * platform.width;
+                    const y = -platform.height / 2 + Math.random() * platform.height;
+                    graphics.fillStyle(0x6a5545, 0.5);
+                    graphics.fillRect(x, y, 6 + Math.random() * 8, 4 + Math.random() * 6);
+                }
+
+                container.add(graphics);
+
+                this.scene.physics.add.existing(container, true);
+                // Fix physics body size after adding to container
+                container.body.setSize(platform.width, platform.height);
+                container.body.setOffset(-platform.width / 2, -platform.height / 2);
+
+                this.currentRoomObjects.platforms.push(container);
             });
         }
 
-        // Create walls
+        // Create walls with enhanced visuals
         if (room.walls) {
             room.walls.forEach(wall => {
-                const rect = this.scene.add.rectangle(
+                const container = this.scene.add.container(
                     wall.x + wall.width / 2,
-                    wall.y + wall.height / 2,
-                    wall.width,
-                    wall.height,
-                    0x555555
+                    wall.y + wall.height / 2
                 );
-                this.scene.physics.add.existing(rect, true);
-                this.currentRoomObjects.walls.push(rect);
+
+                const graphics = this.scene.add.graphics();
+
+                // Shadow
+                graphics.fillStyle(0x333333, 1);
+                graphics.fillRect(-wall.width / 2 + 1, -wall.height / 2 + 1, wall.width, wall.height);
+
+                // Main wall body (darker stone)
+                graphics.fillStyle(0x555555, 1);
+                graphics.fillRect(-wall.width / 2, -wall.height / 2, wall.width, wall.height);
+
+                // Edge highlights
+                graphics.lineStyle(2, 0x666666, 1);
+                graphics.strokeRect(-wall.width / 2, -wall.height / 2, wall.width, wall.height);
+
+                // Brick texture
+                for (let y = 0; y < wall.height; y += 20) {
+                    graphics.lineStyle(1, 0x444444, 0.7);
+                    graphics.lineBetween(
+                        -wall.width / 2,
+                        -wall.height / 2 + y,
+                        wall.width / 2,
+                        -wall.height / 2 + y
+                    );
+                }
+
+                container.add(graphics);
+
+                this.scene.physics.add.existing(container, true);
+                container.body.setSize(wall.width, wall.height);
+                container.body.setOffset(-wall.width / 2, -wall.height / 2);
+
+                this.currentRoomObjects.walls.push(container);
             });
         }
 
